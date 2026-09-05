@@ -3,7 +3,6 @@ package com.meharimamily.virtualcamera.service
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.meharimamily.virtualcamera.data.model.FrameData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
