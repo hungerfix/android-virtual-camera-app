@@ -46,7 +46,7 @@ class CameraConfigRepositoryImpl @Inject constructor(
                     null
                 }
             }
-        }.let { it.hashCode() } as? CameraConfig // This is a workaround for Flow
+        }.let { it.hashCode() } as? CameraConfig
     }
 
     override suspend fun saveConfig(config: CameraConfig) {
