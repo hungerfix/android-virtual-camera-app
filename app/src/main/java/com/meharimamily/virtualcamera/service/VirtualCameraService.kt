@@ -3,7 +3,6 @@ package com.meharimamily.virtualcamera.service
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
 import com.meharimamily.virtualcamera.data.model.FrameData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +33,6 @@ class VirtualCameraService : Service() {
     private suspend fun startVirtualCamera() {
         try {
             Timber.d("Starting virtual camera")
-            // Camera logic will be implemented here
         } catch (e: Exception) {
             Timber.e(e, "Error starting virtual camera")
         }

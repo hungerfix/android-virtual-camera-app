@@ -77,7 +77,7 @@ fun MainScreen(
             TopAppBar(
                 title = { Text("Virtual Camera") },
                 actions = {
-                    IconButton(onClick = { /* Navigate to settings */ }) {
+                    IconButton(onClick = { }) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
                     }
                 }
@@ -101,7 +101,6 @@ fun MainScreen(
             if (configs.isEmpty()) {
                 Text("No camera configurations yet")
             } else {
-                // Config list will be displayed here
                 Text("${configs.size} configuration(s) found")
             }
         }
