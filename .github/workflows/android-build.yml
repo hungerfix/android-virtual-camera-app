@@ -1,72 +1,19 @@
-name: Build Android APK
-
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-      - master
-
-permissions:
-  contents: read
-
-jobs:
-  build:
-    name: Build APK
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v6
-
-      - name: Setup JDK 17
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-        with:
-          gradle-version: '8.2'
-
-      # The repository is missing gradle/libs.versions.toml.
-      - name: Create Gradle version catalog
-        run: |
-          mkdir -p gradle
-
-          cat > gradle/libs.versions.toml <<'EOF'
-          [versions]
-          agp = "8.1.2"
-          kotlin = "1.9.10"
-
-          [plugins]
-          android-application = { id = "com.android.application", version.ref = "agp" }
-          kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-          kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
-          EOF
-
-      - name: Verify Gradle files
-        run: |
-          echo "===== Project ====="
-          ls -la
-
-          echo "===== Version catalog ====="
-          cat gradle/libs.versions.toml
-
       - name: Build Debug APK
-        run: gradle assembleDebug --stacktrace
-
-      - name: Find APK
         run: |
-          echo "===== APK files ====="
-          find . -type f -name "*.apk" -print
+          set +e
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: VirtualCamera-debug
-          path: |
-            **/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-          retention-days: 30
+          gradle assembleDebug --stacktrace 2>&1 | tee build.log
+          EXIT_CODE=${PIPESTATUS[0]}
+
+          echo ""
+          echo "========================================"
+          echo "BUILD ERROR SUMMARY"
+          echo "========================================"
+
+          grep -A 15 -B 5 \
+            -E "FAILURE:|What went wrong:|Execution failed for task|Could not resolve|e: |error:" \
+            build.log || true
+
+          echo "========================================"
+
+          exit $EXIT_CODE
