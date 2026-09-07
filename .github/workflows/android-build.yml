@@ -1,4 +1,4 @@
-name: Build APK
+name: Build Android APK
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build:
-    name: Build Android APK
+    name: Build APK
     runs-on: ubuntu-latest
 
     steps:
@@ -25,28 +25,48 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      # This project does not contain gradlew,
-      # so install/use Gradle directly.
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: '8.2'
 
-      - name: Show project files
+      # The repository is missing gradle/libs.versions.toml.
+      - name: Create Gradle version catalog
         run: |
-          echo "Project:"
+          mkdir -p gradle
+
+          cat > gradle/libs.versions.toml <<'EOF'
+          [versions]
+          agp = "8.1.2"
+          kotlin = "1.9.10"
+
+          [plugins]
+          android-application = { id = "com.android.application", version.ref = "agp" }
+          kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+          kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+          EOF
+
+      - name: Verify Gradle files
+        run: |
+          echo "===== Project ====="
           ls -la
-          echo "Gradle:"
-          find . -maxdepth 3 -type f | sort
+
+          echo "===== Version catalog ====="
+          cat gradle/libs.versions.toml
 
       - name: Build Debug APK
-        run: gradle assembleDebug --stacktrace --info
+        run: gradle assembleDebug --stacktrace
+
+      - name: Find APK
+        run: |
+          echo "===== APK files ====="
+          find . -type f -name "*.apk" -print
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: VirtualCamera-debug
           path: |
-            app/build/outputs/apk/debug/*.apk
+            **/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 30
